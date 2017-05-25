@@ -37,10 +37,12 @@
         </li>
       </ul>
     </div>
+    <shopcard :seller="seller"></shopcard>
   </div>
 </template>
 <script type="text/ecmascript-6">
   import BScroll from 'better-scroll';
+  import shopcard from 'components/shopcard/shopcard';
 
   const ERR_OK = 0;
   export default {
@@ -55,6 +57,9 @@
         listHeight: [],
         scrollY: 0
       };
+    },
+    components: {
+      'shopcard': shopcard
     },
     computed: {
       currentIndex() {

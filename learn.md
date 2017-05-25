@@ -29,3 +29,54 @@ webpack.base.conf.js
 ## 开发
 1. localhost->ip config :草料二维码
 2. 实现真正的1px
+
+## vue-components
+1. 注册组件
+**组件传参：props接收参数**
+```js
+Vue.component('goods', {
+   props:['detail'],
+   template:`<div class="goods">`
+})
+```
+
+```html
+<template>
+  <div class="goods"></div>
+</template>
+
+<script>
+export default{
+  props: {
+    detail: {// 指定接收参数名，类型，默认值
+      type: Number,
+      default: 0
+    }
+  }
+}
+</script>
+
+```
+2. 创建vue实例，挂载
+**组件传参：数据存储**
+
+```js
+let vm = new Vue({
+  el: "#app",
+  data: {
+    seller:{} //数据存储在data中
+  }
+});
+```
+
+3. 使用组件
+**组件传参：html中使用：传参**
+```html
+ <div id="app">
+    <goods :detail="article"></goods>
+ </div>
+```
+
+```js
+<goods></goods>
+```
