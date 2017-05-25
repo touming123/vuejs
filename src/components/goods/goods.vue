@@ -37,7 +37,7 @@
         </li>
       </ul>
     </div>
-    <shopcard :seller="seller"></shopcard>
+    <shopcard :seller="seller" :selectFoods="selectFoods"></shopcard>
   </div>
 </template>
 <script type="text/ecmascript-6">
@@ -55,7 +55,10 @@
       return {
         goods: [],
         listHeight: [],
-        scrollY: 0
+        scrollY: 0,
+        selectFoods: [
+          {price: 10, count: 2}
+        ]
       };
     },
     components: {
