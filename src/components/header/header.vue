@@ -214,6 +214,7 @@
       height: 100%
   .detail
     position: fixed //相对于视口定位
+    z-index: 100
     width: 100%
     height: 100%
     top: 0

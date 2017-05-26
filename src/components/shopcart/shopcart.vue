@@ -2,7 +2,7 @@
   <div class="shopcart">
     <div class="content">
       <div class="content-left">
-        <div class="logo-wrapper">
+        <div class="logo-wrapper" @click="toggleList">
           <div class="logo" :class="{'highlight': totolCount>0}">
             <i class="icon-shopping_cart" :class="{'highlight': totolCount>0}"></i>
           </div>
@@ -12,7 +12,7 @@
         <div class="needPrice">另需配送费￥{{seller.deliveryPrice}}元</div>
       </div>
       <div class="content-right">
-        <div class="delivery" :class="{'highlight': totolPrice>=seller.minPrice}">{{payPrice}}</div>
+        <div class="delivery" :class="{'highlight': totolPrice>=seller.minPrice}" @click="pay">{{payPrice}}</div>
       </div>
     </div>
     <div class="ball-container">
@@ -24,116 +24,189 @@
         </transition>
       </div>
     </div>
+    <transition name="fold">
+      <div class="shopcart-list" v-show="listShow">
+        <div class="list-header">
+          <h1 class="tittle">购物车</h1>
+          <span class="empty" @click="clear">清空</span>
+        </div>
+        <div class="list-content" ref="cartList">
+          <ul>
+            <li class="food" v-for="food in selectFoods">
+              <div class="name">{{food.name}}</div>
+              <div class="price">￥{{food.price*food.count}}</div>
+              <div class="cartcontrol-wrapper">
+                <cartcontrol :food="food"></cartcontrol>
+              </div>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </transition>
+    <transition name="mask">
+      <div class="list-mask" v-show="listShow" @click="hideList"></div>
+    </transition>
   </div>
 </template>
 <script type="text/ecmascript-6">
-export default {
-  props: {
-    seller: {
-      type: Object
-    },
-    selectFoods: {
-      type: Array,
-      default() {
-        return [];
+  import cartcontrol from 'components/cartcontrol/cartcontrol';
+  import BScroll from 'better-scroll';
+
+  export default {
+    props: {
+      seller: {
+        type: Object
+      },
+      selectFoods: {
+        type: Array,
+        default() {
+          return [];
+        }
       }
-    }
-  },
-  data() {
-    return {
-      balls: [
-        {show: false},
-        {show: false},
-        {show: false},
-        {show: false},
-        {show: false},
-        {show: false}
-      ],
-      dropBalls: []
-    };
-  },
-  computed: {
-    totolPrice() {
-      let totolPrice = 0;
-      this.selectFoods.forEach((food) => {
-        totolPrice += food.price * food.count;
-      });
-      return totolPrice;
     },
-    totolCount() {
-      let totolCount = 0;
-      this.selectFoods.forEach((food) => {
-        totolCount += food.count;
-      });
-      return totolCount;
+    data() {
+      return {
+        balls: [
+          {show: false},
+          {show: false},
+          {show: false},
+          {show: false},
+          {show: false},
+          {show: false}
+        ],
+        dropBalls: [],
+        fold: true
+      };
     },
-    payPrice() {
-      if (this.totolPrice === 0) {
-        return `￥${this.seller.minPrice}元起送`;
-      } else if (this.totolPrice < this.seller.minPrice) {
-        return `还差￥${this.seller.minPrice - this.totolPrice}起送`;
-      } else {
-        return `去结算`;
-      }
-    }
-  },
-  methods: {
-    drop(el) {
-      // console.log(el);
-      for (let i = 0; i < this.balls.length; i++) {
-        let ball = this.balls[i];
-        if (!ball.show) {
-          ball.show = true;
-          ball.el = el;
-          this.dropBalls.push(ball);
+    computed: {
+      totolPrice() {
+        let totolPrice = 0;
+        this.selectFoods.forEach((food) => {
+          totolPrice += food.price * food.count;
+        });
+        return totolPrice;
+      },
+      totolCount() {
+        let totolCount = 0;
+        this.selectFoods.forEach((food) => {
+          totolCount += food.count;
+        });
+        return totolCount;
+      },
+      payPrice() {
+        if (this.totolPrice === 0) {
+          return `￥${this.seller.minPrice}元起送`;
+        } else if (this.totolPrice < this.seller.minPrice) {
+          return `还差￥${this.seller.minPrice - this.totolPrice}起送`;
+        } else {
+          return `去结算`;
+        }
+      },
+      listShow() {
+        if (!this.totolCount) {
+          this.fold = true;
           return;
         }
-      }
-    },
-
-    beforeDrop(el) {
-      let count = this.balls.length;
-      while (count--) {
-        let ball = this.balls[count];
-        if (ball.show) {
-          let rect = ball.el.getBoundingClientRect();
-          let x = rect.left - 32;
-          let y = -(window.innerHeight - rect.top - 22);
-          el.style.display = '';
-          el.style.webkitTransform = `translate3d(0,${y}px,0)`;
-          el.style.transform = `translate3d(0,${y}px,0)`;
-          let inner = el.getElementsByClassName('inner-hook')[0];
-          inner.style.webkitTransform = `translate3d(${x}px,0,0)`;
-          inner.style.transform = `translate3d(${x}px,0,0)`;
+        let show = !this.fold;
+        if (show) {
+          this.$nextTick(() => {
+            if (!this.listScroll) {
+              this.listScroll = new BScroll(this.$refs.cartList, {
+                click: true
+              });
+            } else {
+              this.listScroll.refresh();
+            }
+          });
         }
+        return show;
       }
     },
+    methods: {
+      drop(el) {
+        // console.log(el);
+        for (let i = 0; i < this.balls.length; i++) {
+          let ball = this.balls[i];
+          if (!ball.show) {
+            ball.show = true;
+            ball.el = el;
+            this.dropBalls.push(ball);
+            return;
+          }
+        }
+      },
 
-    dropping(el, done) {
-      /* eslint-disable no-unused-vars */
-      let rf = el.offsetHeight; // 手动触发浏览器重绘
-      this.$nextTick(() => {
-        el.style.webkitTransform = 'translate3d(0,0,0)';
-        el.style.transform = 'translate3d(0,0,0)';
-        let inner = el.getElementsByClassName('inner-hook')[0];
-        inner.style.webkitTransform = 'translate3d(0,0,0)';
-        inner.style.transform = 'translate3d(0,0,0)';
-        el.addEventListener('transitionend', done);
-      });
-    },
+      beforeDrop(el) {
+        let count = this.balls.length;
+        while (count--) {
+          let ball = this.balls[count];
+          if (ball.show) {
+            let rect = ball.el.getBoundingClientRect();
+            let x = rect.left - 32;
+            let y = -(window.innerHeight - rect.top - 22);
+            el.style.display = '';
+            el.style.webkitTransform = `translate3d(0,${y}px,0)`;
+            el.style.transform = `translate3d(0,${y}px,0)`;
+            let inner = el.getElementsByClassName('inner-hook')[0];
+            inner.style.webkitTransform = `translate3d(${x}px,0,0)`;
+            inner.style.transform = `translate3d(${x}px,0,0)`;
+          }
+        }
+      },
 
-    afterDrop(el) {
-      let ball = this.dropBalls.shift();
-      if (ball) {
-        ball.show = false;
-        el.style.display = 'none';
+      dropping(el, done) {
+        /* eslint-disable no-unused-vars */
+        let rf = el.offsetHeight; // 手动触发浏览器重绘
+        this.$nextTick(() => {
+          el.style.webkitTransform = 'translate3d(0,0,0)';
+          el.style.transform = 'translate3d(0,0,0)';
+          let inner = el.getElementsByClassName('inner-hook')[0];
+          inner.style.webkitTransform = 'translate3d(0,0,0)';
+          inner.style.transform = 'translate3d(0,0,0)';
+          el.addEventListener('transitionend', done);
+        });
+      },
+
+      afterDrop(el) {
+        let ball = this.dropBalls.shift();
+        if (ball) {
+          ball.show = false;
+          el.style.display = 'none';
+        }
+      },
+
+      toggleList() {
+        if (!this.totolCount) {
+          return;
+        }
+        this.fold = !this.fold;
+      },
+
+      hideList() {
+        this.fold = true;
+      },
+
+      clear() {
+        this.selectFoods.forEach((food) => {
+          food.count = 0;
+        });
+      },
+
+      pay() {
+        if (this.totolPrice < this.seller.minPrice) {
+          return;
+        }
+        alert(`支付${this.totolPrice}元`);
       }
+    },
+    components: {
+      cartcontrol
     }
-  }
-};
+  };
 </script>
 <style lang="stylus" rel="stylesheet/stylus">
-  
+  @import "../../common/stylus/mixin.styl"
+
   .shopcart
     position: fixed
     width: 100%
@@ -234,5 +307,68 @@ export default {
           border-radius: 50%
           background-color: rgb(0, 160, 220)
           transition: all 0.4s linear
+    .shopcart-list
+      position: absolute
+      z-index: -1      
+      width: 100%
+      left: 0
+      top: 0
+      transform: translate3d(0, -100%, 0)
+      &.fold-enter-active, &.fold-leave-active
+        transition: all 0.5s
+      &.fold-enter, &.fold-leave-active
+        transform: translate3d(0, 0, 0)
+      .list-header
+        height: 40px
+        padding: 0 18px
+        border-1px(rgba(7, 17, 27, 0.1))
+        background-color: #f3f5f7
+        .tittle
+          display: inline
+          line-height: 40px
+          font-size: 14px
+          color: rgb(7, 17, 27)
+        .empty
+          float: right
+          padding-left: 10px 
+          line-height: 40px
+          font-size: 12px
+          color: rgb(0, 160, 220)
+      .list-content
+        padding: 0 18px
+        min-height: 217px
+        background-color: #fff
+        .food
+          display: flex
+          box-sizing: border-box
+          height: 48px
+          padding: 12px 0
+          &:not(:last-child)
+            border-1px(rgba(7, 17, 27, 0.1))            
+          .name
+            flex: 1
+            line-height: 24px
+            font-size: 14px
+            color: rgb(7, 17, 27)
+          .price
+            margin: 0 12px 0 18px
+            line-height: 24px
+            font-size: 14px
+            font-weight: 700
+            color: rgb(240, 20, 20)
+          // .cartcontrol-wrapper
+    .list-mask
+      position: fixed
+      z-index: -2
+      width: 100%
+      top: 0
+      left: 0
+      bottom: 0
+      backdrop-filter: blur(10px)
+      background-color: rgba(7, 17, 27, 0.6)
+      &.mask-enter-active, &.mask-leave-active
+        transition: all 0.5s
+      &.mask-enter, &.mask-leave-active
+        opacity: 0
 </style>
 
