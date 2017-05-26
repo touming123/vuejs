@@ -25,10 +25,25 @@ webpack.base.conf.js
 
 ## vue-resource 封装ajax
 
+## vue
+1. 无法操作不存在的对象属性，无法给其赋值
+使用vue.set接口
 
 ## 开发
 1. localhost->ip config :草料二维码
 2. 实现真正的1px
+3. 增大点击区域： padding
+4. display:inline-block一定要font-size=0,vertical-algin:top
+5. transition在vue中使用
+name="", name-enter,name-enter-active
+
+## vue组件通信
+
+## better-scroll
+1. 默认阻止click等
+2. 
+
+
 
 ## vue-components
 1. 注册组件
@@ -69,6 +84,16 @@ let vm = new Vue({
 });
 ```
 
+```js
+import goods from "";
+
+export default{
+  components: {
+    'goods': goods
+  }
+}
+```
+
 3. 使用组件
 **组件传参：html中使用：传参**
 ```html
@@ -76,6 +101,8 @@ let vm = new Vue({
     <goods :detail="article"></goods>
  </div>
 ```
+
+
 
 ```js
 <goods></goods>

@@ -31,18 +31,22 @@
                   <span class="cur">￥{{food.price}}</span>
                   <span v-show="food.oldPrice" class="old">￥{{food.oldPrice}}</span>
                 </div>
+                <div class="cartcontrol-wrapper">
+                  <cartcontrol :food="food" v-on:add="addFood"></cartcontrol>
+                </div>
               </div>
             </li>
           </ul>
         </li>
       </ul>
     </div>
-    <shopcard :seller="seller" :selectFoods="selectFoods"></shopcard>
+    <shopcart ref="shopcart" :seller="seller" :selectFoods="selectFoods"></shopcart>
   </div>
 </template>
 <script type="text/ecmascript-6">
   import BScroll from 'better-scroll';
-  import shopcard from 'components/shopcard/shopcard';
+  import shopcart from 'components/shopcart/shopcart';
+  import cartcontrol from 'components/cartcontrol/cartcontrol';
 
   const ERR_OK = 0;
   export default {
@@ -55,14 +59,12 @@
       return {
         goods: [],
         listHeight: [],
-        scrollY: 0,
-        selectFoods: [
-          {price: 10, count: 2}
-        ]
+        scrollY: 0
       };
     },
     components: {
-      'shopcard': shopcard
+      'shopcart': shopcart,
+      'cartcontrol': cartcontrol
     },
     computed: {
       currentIndex() {
@@ -75,6 +77,17 @@
           }
         }
         return 0;
+      },
+      selectFoods() {
+        let foods = [];
+        this.goods.forEach((good) => {
+          good.foods.forEach((food) => {
+            if (food.count) { // cartcontrol组件中对food增添了count属性
+              foods.push(food);
+            }
+          });
+        });
+        return foods;
       }
     },
     created() {
@@ -96,11 +109,23 @@
         this.foodsScroll.scrollToElement(this.$refs.foodsList[index], 300);
       },
 
+      addFood(target) {
+        this._drop(target);
+      },
+
+      _drop(target) {
+        // 优化体验，异步执行动画
+        this.$nextTick(() => {
+          this.$refs.shopcart.drop(target); // this.$refs访问子组件
+        });
+      },
+
       _initScroll() {
         this.menuScroll = new BScroll(this.$refs.menuWrapper, {
           click: true
         });
         this.foodsScroll = new BScroll(this.$refs.foodsWrapper, {
+          click: true, // betterscroll默认阻止click等事件
           probeType: 3
         });
         this.foodsScroll.on('scroll', (pos) => {
@@ -193,6 +218,7 @@
         background-color: #fff
         .food-item
           display: flex
+          position: relative
           padding: 18px 0
           font-size: 0
           &:not(:last-child)
@@ -232,4 +258,8 @@
                 text-decoration: line-through
                 font-size: 10px
                 color: rgb(147, 153, 159)
+            .cartcontrol-wrapper
+              position: absolute
+              right: 0
+              bottom: 12px
 </style>
