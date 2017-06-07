@@ -35,6 +35,22 @@
           <h1 class="tittle">商品评价</h1>
           <ratingselect @select="changeSelectType" @toggle="toggleOnlyContent" :ratings="food.ratings" :selectType="selectType" :onlyContent="onlyContent" :desc="desc"></ratingselect>
         </div>
+        <div class="rating-wrapper">
+          <ul v-show="food.ratings && food.ratings.length">
+            <li v-show="showRating(rating.rateType, rating.text)" v-for="rating in food.ratings" class="rating-item">
+              <div class="user">
+                <span class="name">{{rating.username}}</span>
+                <img class="avatar" :src="rating.avatar">
+              </div>
+              <div class="time">{{rating.rateTime | formatDate}}</div>
+              <p class="text">
+                <span class="icon" :class="{'icon-thumb_up':rating.rateType===0,'icon-thumb_down':rating.rateType===1}"></span>
+                {{rating.text}}
+              </p>
+            </li>
+          </ul>
+          <div class="no-rating" v-show="!food.ratings || food.ratings.length===0">暂无评价</div>
+        </div>
       </div>
     </div>
   </transition>
@@ -45,6 +61,7 @@ import cartcontrol from 'components/cartcontrol/cartcontrol';
 import Vue from 'vue';
 import split from 'components/split/split';
 import ratingselect from 'components/ratingselect/ratingselect';
+import {formatDate} from '../../common/js/formatDate.js';
 
 const ALL = 2;
 
@@ -72,9 +89,19 @@ export default {
 
   },
 
+  filters: {// 过滤属性
+    formatDate(time) {
+      return formatDate(time, 'YYYY-MM-DD hh:mm');
+    }
+  },
+
   methods: {
     show() {
       this.showFlag = true;
+      // 每次更新重置
+      this.selectType = ALL;
+      this.onlyContent = true;
+
       this.$nextTick(() => {
         if (!this.scroll) {
           this.scroll = new BScroll(this.$refs.food, {
@@ -104,10 +131,28 @@ export default {
 
     changeSelectType(type) {
       this.selectType = type;
+      this.$nextTick(() => {// 异步更新dom
+        this.scroll.refresh();
+      })
     },
 
     toggleOnlyContent() {
       this.onlyContent = !this.onlyContent;
+      this.$nextTick(() => {// 异步更新dom
+        this.scroll.refresh();
+      })
+    },
+
+    showRating(type, text) {
+      if (this.onlyContent && !text) {
+        return false;
+      }
+      if (this.selectType === ALL) {
+        return true;
+      } else {
+        return this.selectType === type;
+      }
+      
     }
   },
 
@@ -225,4 +270,45 @@ export default {
         margin-left: 18px
         font-size: 14px
         color: rgb(7, 17, 27) 
+    .rating-wrapper
+      padding: 0 18px
+      .rating-item
+        position: relative
+        padding: 16px 0
+        line-height: 12px
+        font-size: 10px
+        color: rgb(147, 153, 159)
+        &:not(:last-child)
+          border-1px(rgba(7, 17, 27, 0.1))
+        .user
+          position: absolute
+          top: 16px
+          right: 0
+          font-size: 0
+          .name
+            margin-right: 6px
+            vertical-align: top
+            font-size: 10px
+          .avatar
+            width: 12px
+            height: 12px
+            border-radius: 50%
+            vertical-align: top
+        .time
+          margin-bottom: 6px
+        .text
+          line-height: 16px
+          font-size: 12px
+          color: rgb(7, 17, 27)
+          .icon
+            font-size: 12px
+            line-height: 16px
+            &.icon-thumb_up
+              color: rgb(0, 160, 220)
+            &.icon-thumb_down
+              color: rgb(147, 153, 159)
+      .no-rating
+        padding: 16px 0
+        font-size: 12px
+        color: rgb(147, 153, 159)
 </style>
