@@ -340,6 +340,7 @@
         background-color: #fff
         .food
           display: flex
+          position: relative
           box-sizing: border-box
           height: 48px
           padding: 12px 0

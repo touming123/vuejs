@@ -16,7 +16,7 @@
         <li v-for="foods in goods" class="foods-list" ref="foodsList">
           <h1 class="tittle">{{foods.name}}</h1>
           <ul class="foods">
-            <li v-for="food in foods.foods" class="food-item">
+            <li v-for="food in foods.foods" class="food-item" @click="selectFood(food)">
               <div class="icon">
                 <img width="57" height="57" :src="food.icon">
               </div>
@@ -41,12 +41,14 @@
       </ul>
     </div>
     <shopcart ref="shopcart" :seller="seller" :selectFoods="selectFoods"></shopcart>
+    <food :food="selectedFood" ref="food" v-on:add="addFood"></food><!--@add自定义事件，子组件向父组件通信-->
   </div>
 </template>
 <script type="text/ecmascript-6">
   import BScroll from 'better-scroll';
   import shopcart from 'components/shopcart/shopcart';
   import cartcontrol from 'components/cartcontrol/cartcontrol';
+  import food from 'components/food/food';
 
   const ERR_OK = 0;
   export default {
@@ -59,12 +61,14 @@
       return {
         goods: [],
         listHeight: [],
-        scrollY: 0
+        scrollY: 0,
+        selectedFood: {}
       };
     },
     components: {
       'shopcart': shopcart,
-      'cartcontrol': cartcontrol
+      'cartcontrol': cartcontrol,
+      'food': food
     },
     computed: {
       currentIndex() {
@@ -111,6 +115,11 @@
 
       addFood(target) {
         this._drop(target);
+      },
+
+      selectFood(food) {
+        this.selectedFood = food;
+        this.$refs.food.show();
       },
 
       _drop(target) {
