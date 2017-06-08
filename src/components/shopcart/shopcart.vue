@@ -336,7 +336,8 @@
           color: rgb(0, 160, 220)
       .list-content
         padding: 0 18px
-        min-height: 217px
+        max-height: 217px
+        overflow: hidden //固定大小
         background-color: #fff
         .food
           display: flex

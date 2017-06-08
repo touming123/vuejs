@@ -13,8 +13,13 @@ export function formatDate(time, str) {
   for (let key in rep) {
     if (new RegExp(`(${key})`).test(str)) {
       let val = rep[key];
-      str = str.replace(RegExp.$1, RegExp.$1.length === 1 ? '0' + (val + '') : (val + ''));
+      str = str.replace(RegExp.$1, RegExp.$1.length === 1 ? val : addZero(val));
     }
   }
   return str;
+}
+
+function addZero(val) {
+  val = '0' + val;
+  return val.substr(val.length - 2);
 }

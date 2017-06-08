@@ -6,7 +6,7 @@
         <router-link to="/goods">商品</router-link>
       </div>
       <div class="tab-item">
-        <router-link to="/ratings">评论</router-link>
+        <router-link to="/ratings" ::seller="seller">评论</router-link>
       </div>
       <div class="tab-item">
         <router-link to="/seller">商家</router-link>
@@ -32,7 +32,6 @@
         response = response.body;
         if (response.errno === ERR_OK) {
           this.seller = response.data;
-          console.log(this.seller);
         }
       });
     },

@@ -46,6 +46,7 @@ name="", name-enter,name-enter-active
 
 
 ## vue-components
+
 1. 注册组件
 **组件传参：props接收参数**
 ```js
@@ -107,3 +108,32 @@ export default{
 ```js
 <goods></goods>
 ```
+
+# 八.商品详情页
+food.vue
+1. 顶部正方形
+width: 100%
+height: 0
+padding-bottom: 100%
+2. 使用cartcontrol组件
+3. 设置购物车transition消失，以便小球做抛物线
+4. 增加split组件
+5. 增加ratingselect组件
+默认值
+传参，因为会重复调用组件，参数要重置，不然上次选择影响本次
+子组件事件派发给父组件
+6. better-scroll
+this.$nextTick()中触发refresh()
+7. 更新dom操作也要再来this.$nextTick()中
+8. 计算时间
+new Date()
+正则匹配，test,replace
+
+# 九
+1. 高度固定，相对于视口
+只有固定了高度，才可以使用better-scroll进行滚动
+2. 组件外层最好包一层wrapper，使用wrapper进行块级或者行级展示，位置等
+3. nextTick
+4. filters
+5. &:not(:last-child)
+6. absolute相对于非static祖先元素的padding-box定位
