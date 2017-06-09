@@ -6,25 +6,33 @@
         <router-link to="/goods">商品</router-link>
       </div>
       <div class="tab-item">
-        <router-link to="/ratings" ::seller="seller">评论</router-link>
+        <router-link to="/ratings" :seller="seller">评论</router-link>
       </div>
       <div class="tab-item">
-        <router-link to="/seller">商家</router-link>
+        <router-link to="/seller" :seller="seller">商家</router-link>
       </div>
     </div>
-    <router-view :seller="seller"></router-view>
+    <keep-alive><!--把切换出去的组件保留在内存中，可以保留它的状态或避免重新渲染-->
+      <router-view :seller="seller"></router-view>
+    </keep-alive>
   </div>
 </template>
 
 <script>
   import header from './components/header/header.vue';
-  
+  import {urlParse} from './common/js/util.js';
+
   const ERR_OK = 0;
   
   export default{
     data() {
       return {
-        seller: {}
+        seller: {
+          id: (() => {
+            let query = urlParse();
+            return query.id;
+          })()
+        }
       };
     },
     created() {
